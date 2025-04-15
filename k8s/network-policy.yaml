@@ -2,6 +2,7 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: allow-external-to-pod1
+  namespace: tier-1
 spec:
   podSelector:
     matchLabels:
@@ -16,6 +17,7 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: allow-pod1-to-pod2
+  namespace: tier-1
 spec:
   podSelector:
     matchLabels:
@@ -24,9 +26,12 @@ spec:
   - Egress
   egress:
   - to:
-    - podSelector:
+    - namespaceSelector:
         matchLabels:
-          app: pod2-ssh # Allow egress only to Pod 2
+          name: tier-2
+      podSelector:
+        matchLabels:
+          app: pod2-ssh # Allow egress only to Pod 2 in tier-2
     ports:
     - protocol: TCP
       port: 22 # Allow egress to Pod 2's SSH port
@@ -36,6 +41,7 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: allow-pod1-ingress-to-pod2
+  namespace: tier-2
 spec:
   podSelector:
     matchLabels:
@@ -44,9 +50,12 @@ spec:
   - Ingress
   ingress:
   - from:
-    - podSelector:
+    - namespaceSelector:
         matchLabels:
-          app: pod1-webapp # Allow ingress only from Pod 1
+          name: tier-1
+      podSelector:
+        matchLabels:
+          app: pod1-webapp # Allow ingress only from Pod 1 in tier-1
     ports:
     - protocol: TCP
       port: 22 # Allow ingress on the SSH port

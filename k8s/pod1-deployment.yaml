@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: pod1-webapp
+  namespace: tier-1
   labels:
     app: pod1-webapp
 spec:
@@ -21,6 +22,34 @@ spec:
         imagePullPolicy: Never
         ports:
         - containerPort: 5000
+        env: # Added environment variables from ConfigMap and Secret
+          - name: MOTD
+            valueFrom:
+              configMapKeyRef:
+                name: pod1-config
+                key: MESSAGE_OF_THE_DAY
+          - name: MODE
+            valueFrom:
+              configMapKeyRef:
+                name: pod1-config
+                key: APP_MODE
+          - name: DB_URL
+            valueFrom:
+              secretKeyRef:
+                name: pod1-secrets
+                key: DATABASE_URL
+        livenessProbe: # Added Liveness Probe
+            httpGet:
+              path: / # Assuming root path for health check
+              port: 5000
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          readinessProbe: # Added Readiness Probe
+            httpGet:
+              path: / # Assuming root path for readiness check
+              port: 5000
+            initialDelaySeconds: 5
+            periodSeconds: 10
         # Add security context if needed for sudo NOPASSWD later
         # securityContext:
         #   capabilities:
