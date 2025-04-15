@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: pod2-ssh
-  namespace: tier-2
+  namespace: internal
   labels:
     app: pod2-ssh
 spec:

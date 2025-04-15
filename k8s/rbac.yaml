@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: cluster-admin-sa
-  namespace: tier-2
+  namespace: internal # Renamed from tier-2
 # Note: By default, this SA is created in the 'default' namespace unless specified otherwise.
 # Ensure Pod 2 deployment references this SA in the correct namespace if not 'default'.
 
@@ -24,7 +24,7 @@ metadata:
 subjects:
 - kind: ServiceAccount
   name: cluster-admin-sa
-  namespace: tier-2
+  namespace: internal # Renamed from tier-2
 roleRef:
   kind: ClusterRole
   name: cluster-admin-role

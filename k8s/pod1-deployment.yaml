@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: pod1-webapp
-  namespace: tier-1
+  namespace: external
   labels:
     app: pod1-webapp
 spec:
