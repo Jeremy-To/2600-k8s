@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pod2-ssh
+  labels:
+    app: pod2-ssh
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pod2-ssh
+  template:
+    metadata:
+      labels:
+        app: pod2-ssh
+    spec:
+      # Associate with the overly permissive ServiceAccount (defined later in rbac.yaml)
+      serviceAccountName: cluster-admin-sa 
+      containers:
+      - name: sshd
+        # TODO: Replace with the actual image name once built
+        image: ssh-server:latest 
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 22
+        securityContext:
+          privileged: true # Required for container breakout
+      # Necessary for privileged pods that might need host access
+      hostPID: true 
+      # hostNetwork: true # Consider if needed for specific escape techniques

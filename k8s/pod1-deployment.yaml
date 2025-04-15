@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pod1-webapp
+  labels:
+    app: pod1-webapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pod1-webapp
+  template:
+    metadata:
+      labels:
+        app: pod1-webapp
+    spec:
+      containers:
+      - name: webapp
+        # TODO: Replace with the actual image name once built
+        image: vulnerable-webapp:latest 
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 5000
+        # Add security context if needed for sudo NOPASSWD later
+        # securityContext:
+        #   capabilities:
+        #     add: ["SYS_ADMIN"] # Example, adjust as needed for sudo setup

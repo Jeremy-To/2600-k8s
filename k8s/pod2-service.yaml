@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: pod2-ssh-service
+spec:
+  selector:
+    app: pod2-ssh
+  ports:
+    - protocol: TCP
+      port: 22 # Service listens on port 22
+      targetPort: 22 # Container listens on port 22
+  type: ClusterIP # Internal service only
