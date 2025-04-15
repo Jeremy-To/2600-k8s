@@ -22,11 +22,6 @@ spec:
         ports:
         - containerPort: 8080
         env:
-          - name: MOTD
-            valueFrom:
-              configMapKeyRef:
-                name: pod1-config
-                key: MESSAGE_OF_THE_DAY
           - name: MODE
             valueFrom:
               configMapKeyRef:
@@ -40,12 +35,12 @@ spec:
         livenessProbe:
             httpGet:
               path: /
-              port: 5000
+              port: 8080
             initialDelaySeconds: 15
             periodSeconds: 20
           readinessProbe:
             httpGet:
               path: /
-              port: 5000
+              port: 8080
             initialDelaySeconds: 5
             periodSeconds: 10
