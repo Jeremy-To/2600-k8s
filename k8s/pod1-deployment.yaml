@@ -20,7 +20,7 @@ spec:
         image: vulnerable-webapp:latest 
         imagePullPolicy: Never
         ports:
-        - containerPort: 5000
+        - containerPort: 8080
         # Add security context if needed for sudo NOPASSWD later
         # securityContext:
         #   capabilities:
