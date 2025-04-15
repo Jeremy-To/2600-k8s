@@ -39,17 +39,17 @@ spec:
                 name: pod1-secrets
                 key: DATABASE_URL
         livenessProbe: # Added Liveness Probe
-            httpGet:
-              path: / # Assuming root path for health check
-              port: 5000
-            initialDelaySeconds: 15
-            periodSeconds: 20
-          readinessProbe: # Added Readiness Probe
-            httpGet:
-              path: / # Assuming root path for readiness check
-              port: 5000
-            initialDelaySeconds: 5
-            periodSeconds: 10
+          httpGet:
+            path: / # Assuming root path for health check
+            port: 5000
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        readinessProbe: # Corrected Indentation
+          httpGet:
+            path: / # Assuming root path for readiness check
+            port: 5000
+          initialDelaySeconds: 5
+          periodSeconds: 10
         # Add security context if needed for sudo NOPASSWD later
         # securityContext:
         #   capabilities:
