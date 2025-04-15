@@ -17,11 +17,16 @@ spec:
     spec:
       containers:
       - name: webapp
-        image: webapp
+        image: vulnerable-webapp:latest
         imagePullPolicy: Never
         ports:
-        - containerPort: 8080
+        - containerPort: 5000
         env:
+          - name: MOTD
+            valueFrom:
+              configMapKeyRef:
+                name: pod1-config
+                key: MESSAGE_OF_THE_DAY
           - name: MODE
             valueFrom:
               configMapKeyRef:
@@ -35,12 +40,16 @@ spec:
         livenessProbe:
           httpGet:
             path: /
-            port: 8080
+            port: 5000
           initialDelaySeconds: 15
           periodSeconds: 20
         readinessProbe:
           httpGet:
             path: /
-            port: 8080
+            port: 5000
           initialDelaySeconds: 5
           periodSeconds: 10
+        # Add security context if needed for sudo NOPASSWD later
+        # securityContext:
+        #   capabilities:
+        #     add: ["SYS_ADMIN"] # Example, adjust as needed for sudo setup
