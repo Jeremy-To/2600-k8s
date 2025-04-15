@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: pod2-ssh
+  namespace: internal
   labels:
     app: pod2-ssh
 spec:
@@ -23,8 +24,29 @@ spec:
         imagePullPolicy: Never
         ports:
         - containerPort: 22
+        livenessProbe: # Added Liveness Probe
+            tcpSocket:
+              port: 22
+            initialDelaySeconds: 15
+            periodSeconds: 20
+        readinessProbe: # Added Readiness Probe
+            tcpSocket:
+              port: 22
+            initialDelaySeconds: 5
+            periodSeconds: 10
+        volumeMounts: # Added volume mount for authorized_keys
+        - name: ssh-key-volume
+          mountPath: /root/.ssh # Mount into the expected location for authorized_keys
+          readOnly: true
         securityContext:
           privileged: true # Required for container breakout
+      volumes: # Added volume definition for the Secret
+      - name: ssh-key-volume
+        secret:
+          secretName: pod2-ssh-key
+          items:
+          - key: authorized_keys
+            path: authorized_keys # File name inside the mount path /root/.ssh
       # Necessary for privileged pods that might need host access
       hostPID: true 
       # hostNetwork: true # Consider if needed for specific escape techniques
