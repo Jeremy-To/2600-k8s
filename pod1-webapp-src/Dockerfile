@@ -2,10 +2,11 @@ FROM python:3.9-slim
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y sudo procps iputils-ping && \
-    rm -rf /var/lib/apt/lists/* && \
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends sudo procps iputils-ping curl && \
     useradd -ms /bin/bash appuser && \
-    echo "appuser ALL=(ALL) NOPASSWD: /usr/bin/python3" >> /etc/sudoers
+    echo "appuser ALL=(ALL) NOPASSWD: /usr/bin/python3" >> /etc/sudoers && \
+    rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt requirements.txt
 COPY app.py app.py
