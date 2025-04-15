@@ -17,12 +17,11 @@ spec:
     spec:
       containers:
       - name: webapp
-        # TODO: Replace with the actual image name once built
-        image: vulnerable-webapp:latest 
+        image: webapp
         imagePullPolicy: Never
         ports:
         - containerPort: 8080
-        env: # Added environment variables from ConfigMap and Secret
+        env:
           - name: MOTD
             valueFrom:
               configMapKeyRef:
@@ -38,19 +37,15 @@ spec:
               secretKeyRef:
                 name: pod1-secrets
                 key: DATABASE_URL
-        livenessProbe: # Added Liveness Probe
+        livenessProbe:
             httpGet:
-              path: / # Assuming root path for health check
+              path: /
               port: 5000
             initialDelaySeconds: 15
             periodSeconds: 20
-          readinessProbe: # Added Readiness Probe
+          readinessProbe:
             httpGet:
-              path: / # Assuming root path for readiness check
+              path: /
               port: 5000
             initialDelaySeconds: 5
             periodSeconds: 10
-        # Add security context if needed for sudo NOPASSWD later
-        # securityContext:
-        #   capabilities:
-        #     add: ["SYS_ADMIN"] # Example, adjust as needed for sudo setup

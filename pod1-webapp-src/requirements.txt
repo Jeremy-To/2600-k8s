@@ -1,2 +1,1 @@
-# pod1-webapp-src/requirements.txt
-Flask==2.3.2 # Use a specific version for reproducibility
+Flask==2.3.2

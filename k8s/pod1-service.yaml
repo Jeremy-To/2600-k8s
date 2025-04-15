@@ -2,13 +2,12 @@ apiVersion: v1
 kind: Service
 metadata:
   name: pod1-webapp-service
-  namespace: external # Renamed from tier-1
+  namespace: external
 spec:
   selector:
     app: pod1-webapp
   ports:
     - protocol: TCP
-      port: 80 # Port the service listens on internally
-      targetPort: 8080 # Port the container listens on
-      # nodePort: 30007 # Optional: Specify a fixed NodePort (must be in range 30000-32767)
-  type: NodePort # Use NodePort for accessibility outside the cluster without a cloud LB
+      port: 8080
+      targetPort: 8080
+  type: NodePort

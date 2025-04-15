@@ -10,7 +10,7 @@ spec:
   policyTypes:
   - Ingress
   ingress:
-  - {} # Allows ingress traffic from all sources (including outside the cluster if service is NodePort/LB)
+  - {}
 
 ---
 apiVersion: networking.k8s.io/v1
@@ -21,7 +21,7 @@ metadata:
 spec:
   podSelector:
     matchLabels:
-      app: pod1-webapp # Apply this policy to Pod 1
+      app: pod1-webapp
   policyTypes:
   - Egress
   egress:
@@ -31,10 +31,10 @@ spec:
           name: internal
       podSelector:
         matchLabels:
-          app: pod2-ssh # Allow egress only to Pod 2 in internal
+          app: pod2-ssh
     ports:
     - protocol: TCP
-      port: 22 # Allow egress to Pod 2's SSH port
+      port: 22
 
 ---
 apiVersion: networking.k8s.io/v1
@@ -45,7 +45,7 @@ metadata:
 spec:
   podSelector:
     matchLabels:
-      app: pod2-ssh # Apply this policy to Pod 2
+      app: pod2-ssh
   policyTypes:
   - Ingress
   ingress:
@@ -55,7 +55,7 @@ spec:
           name: external
       podSelector:
         matchLabels:
-          app: pod1-webapp # Allow ingress only from Pod 1 in external
+          app: pod1-webapp
     ports:
     - protocol: TCP
-      port: 22 # Allow ingress on the SSH port
+      port: 22
