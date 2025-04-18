@@ -21,7 +21,7 @@ kubectl get pods --all-namespaces
 
 ## Exploitation
 
-### WebApp
+### DockerDesktop
 ```
 http://localhost:30001
 ```
