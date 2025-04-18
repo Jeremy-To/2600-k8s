@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sshpod
+  labels:
+    app: sshpod
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sshpod
+  template:
+    metadata:
+      labels:
+        app: sshpod
+    spec:
+      hostPID: true
+      containers:
+      - name: ssh
+        image: sshpod:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 22
+        env:
+        - name: ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: ssh-secret
+              key: ssh-root-password
+        securityContext:
+          privileged: true

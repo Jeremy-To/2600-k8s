@@ -1,0 +1,16 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-webapp-to-sshpod
+spec:
+  podSelector:
+    matchLabels:
+      app: sshpod
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: webapp
+    ports:
+    - protocol: TCP
+      port: 22
