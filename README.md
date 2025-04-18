@@ -16,7 +16,7 @@ kubectl apply -f manifests/
 
 ### Verify deployment
 ```shell
-kubectl get pods
+kubectl get pods --all-namespaces
 ```
 
 ## Exploitation
