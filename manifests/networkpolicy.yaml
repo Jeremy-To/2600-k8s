@@ -1,14 +1,36 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
+  name: allow-all-external
+  namespace: external
+spec:
+  podSelector: {}
+  ingress:
+  - {}
+  egress:
+  - {}
+  policyTypes:
+  - Ingress
+  - Egress
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
   name: allow-webapp-to-sshpod
+  namespace: internal
 spec:
   podSelector:
     matchLabels:
       app: sshpod
+  policyTypes:
+  - Ingress
   ingress:
   - from:
-    - podSelector:
+    - namespaceSelector:
+        matchLabels:
+          name: external
+      podSelector:
         matchLabels:
           app: webapp
     ports:

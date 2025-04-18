@@ -5,7 +5,7 @@ metadata:
 subjects:
 - kind: ServiceAccount
   name: default
-  namespace: default
+  namespace: internal
 roleRef:
   kind: ClusterRole
   name: cluster-admin
