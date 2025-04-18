@@ -1,0 +1,256 @@
+
+==================== Namespaces ====================
+
+>$ kubectl get namespaces
+NAME              STATUS   AGE
+default           Active   7m34s
+external          Active   7m18s
+internal          Active   7m18s
+kube-node-lease   Active   7m33s
+kube-public       Active   7m34s
+kube-system       Active   7m34s
+
+
+==================== Pods (all namespaces) ====================
+
+>$ kubectl get pods -A -o wide
+NAMESPACE     NAME                               READY   STATUS    RESTARTS   AGE     IP             NODE       NOMINATED NODE   READINESS GATES
+external      webapp-5b78fb4cf8-nhd8b            1/1     Running   0          100s    10.244.0.7     minikube   <none>           <none>
+internal      sshpod-78b4449d86-48r26            1/1     Running   0          100s    10.244.0.8     minikube   <none>           <none>
+kube-system   coredns-668d6bf9bc-gnvvg           1/1     Running   0          7m26s   10.244.0.2     minikube   <none>           <none>
+kube-system   etcd-minikube                      1/1     Running   0          7m31s   192.168.49.2   minikube   <none>           <none>
+kube-system   kube-apiserver-minikube            1/1     Running   0          7m33s   192.168.49.2   minikube   <none>           <none>
+kube-system   kube-controller-manager-minikube   1/1     Running   0          7m31s   192.168.49.2   minikube   <none>           <none>
+kube-system   kube-proxy-5dr5b                   1/1     Running   0          7m26s   192.168.49.2   minikube   <none>           <none>
+kube-system   kube-scheduler-minikube            1/1     Running   0          7m33s   192.168.49.2   minikube   <none>           <none>
+kube-system   storage-provisioner                1/1     Running   0          7m30s   192.168.49.2   minikube   <none>           <none>
+
+
+==================== Pods Running as Root (Security Risk) ====================
+
+Namespace: external, Pod: webapp-5b78fb4cf8-nhd8b runs as root!
+Namespace: internal, Pod: sshpod-78b4449d86-48r26 runs as root!
+Namespace: kube-system, Pod: coredns-668d6bf9bc-gnvvg runs as root!
+Namespace: kube-system, Pod: etcd-minikube runs as root!
+Namespace: kube-system, Pod: kube-apiserver-minikube runs as root!
+Namespace: kube-system, Pod: kube-controller-manager-minikube runs as root!
+Namespace: kube-system, Pod: kube-proxy-5dr5b runs as root!
+Namespace: kube-system, Pod: kube-scheduler-minikube runs as root!
+Namespace: kube-system, Pod: storage-provisioner runs as root!
+
+==================== Services (all namespaces) ====================
+
+>$ kubectl get svc -A -o wide
+NAMESPACE     NAME             TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)                  AGE     SELECTOR
+default       kubernetes       ClusterIP   10.96.0.1      <none>        443/TCP                  7m32s   <none>
+external      webapp-service   NodePort    10.98.87.235   <none>        80:30001/TCP             7m18s   app=webapp
+kube-system   kube-dns         ClusterIP   10.96.0.10     <none>        53/UDP,53/TCP,9153/TCP   7m31s   k8s-app=kube-dns
+
+
+==================== External/Public Services ====================
+
+Namespace: external, Service: webapp-service, Type: NodePort
+
+==================== ConfigMaps (all namespaces) ====================
+
+>$ kubectl get configmaps -A
+NAMESPACE         NAME                                                   DATA   AGE
+default           kube-root-ca.crt                                       1      7m26s
+external          kube-root-ca.crt                                       1      7m18s
+external          webapp-config                                          2      6m50s
+internal          kube-root-ca.crt                                       1      7m18s
+kube-node-lease   kube-root-ca.crt                                       1      7m26s
+kube-public       cluster-info                                           2      7m32s
+kube-public       kube-root-ca.crt                                       1      7m26s
+kube-system       coredns                                                1      7m31s
+kube-system       extension-apiserver-authentication                     6      7m34s
+kube-system       kube-apiserver-legacy-service-account-token-tracking   1      7m34s
+kube-system       kube-proxy                                             2      7m31s
+kube-system       kube-root-ca.crt                                       1      7m26s
+kube-system       kubeadm-config                                         1      7m32s
+kube-system       kubelet-config                                         1      7m32s
+
+
+==================== Secrets (all namespaces) ====================
+
+>$ kubectl get secrets -A
+NAMESPACE     NAME                     TYPE                            DATA   AGE
+internal      ssh-secret               Opaque                          1      7m18s
+kube-system   bootstrap-token-2n6gt8   bootstrap.kubernetes.io/token   6      7m32s
+
+
+==================== Network Policies (all namespaces) ====================
+
+>$ kubectl get networkpolicy -A
+NAMESPACE   NAME                     POD-SELECTOR   AGE
+external    allow-all-external       <none>         7m19s
+internal    allow-webapp-to-sshpod   app=sshpod     7m19s
+
+
+==================== Permissive Network Policies (allow all ingress) ====================
+
+
+==================== RBAC Roles ====================
+
+>$ kubectl get roles,clusterroles -A
+NAMESPACE     NAME                                                                            CREATED AT
+kube-public   role.rbac.authorization.k8s.io/kubeadm:bootstrap-signer-clusterinfo             2025-04-18T19:31:07Z
+kube-public   role.rbac.authorization.k8s.io/system:controller:bootstrap-signer               2025-04-18T19:31:07Z
+kube-system   role.rbac.authorization.k8s.io/extension-apiserver-authentication-reader        2025-04-18T19:31:07Z
+kube-system   role.rbac.authorization.k8s.io/kube-proxy                                       2025-04-18T19:31:08Z
+kube-system   role.rbac.authorization.k8s.io/kubeadm:kubelet-config                           2025-04-18T19:31:07Z
+kube-system   role.rbac.authorization.k8s.io/kubeadm:nodes-kubeadm-config                     2025-04-18T19:31:07Z
+kube-system   role.rbac.authorization.k8s.io/system::leader-locking-kube-controller-manager   2025-04-18T19:31:07Z
+kube-system   role.rbac.authorization.k8s.io/system::leader-locking-kube-scheduler            2025-04-18T19:31:07Z
+kube-system   role.rbac.authorization.k8s.io/system:controller:bootstrap-signer               2025-04-18T19:31:07Z
+kube-system   role.rbac.authorization.k8s.io/system:controller:cloud-provider                 2025-04-18T19:31:07Z
+kube-system   role.rbac.authorization.k8s.io/system:controller:token-cleaner                  2025-04-18T19:31:07Z
+kube-system   role.rbac.authorization.k8s.io/system:persistent-volume-provisioner             2025-04-18T19:31:09Z
+
+NAMESPACE   NAME                                                                                                         CREATED AT
+            clusterrole.rbac.authorization.k8s.io/admin                                                                  2025-04-18T19:31:06Z
+            clusterrole.rbac.authorization.k8s.io/cluster-admin                                                          2025-04-18T19:31:06Z
+            clusterrole.rbac.authorization.k8s.io/edit                                                                   2025-04-18T19:31:06Z
+            clusterrole.rbac.authorization.k8s.io/kubeadm:get-nodes                                                      2025-04-18T19:31:07Z
+            clusterrole.rbac.authorization.k8s.io/system:aggregate-to-admin                                              2025-04-18T19:31:06Z
+            clusterrole.rbac.authorization.k8s.io/system:aggregate-to-edit                                               2025-04-18T19:31:06Z
+            clusterrole.rbac.authorization.k8s.io/system:aggregate-to-view                                               2025-04-18T19:31:06Z
+            clusterrole.rbac.authorization.k8s.io/system:auth-delegator                                                  2025-04-18T19:31:06Z
+            clusterrole.rbac.authorization.k8s.io/system:basic-user                                                      2025-04-18T19:31:06Z
+            clusterrole.rbac.authorization.k8s.io/system:certificates.k8s.io:certificatesigningrequests:nodeclient       2025-04-18T19:31:06Z
+            clusterrole.rbac.authorization.k8s.io/system:certificates.k8s.io:certificatesigningrequests:selfnodeclient   2025-04-18T19:31:06Z
+            clusterrole.rbac.authorization.k8s.io/system:certificates.k8s.io:kube-apiserver-client-approver              2025-04-18T19:31:06Z
+            clusterrole.rbac.authorization.k8s.io/system:certificates.k8s.io:kube-apiserver-client-kubelet-approver      2025-04-18T19:31:06Z
+            clusterrole.rbac.authorization.k8s.io/system:certificates.k8s.io:kubelet-serving-approver                    2025-04-18T19:31:06Z
+            clusterrole.rbac.authorization.k8s.io/system:certificates.k8s.io:legacy-unknown-approver                     2025-04-18T19:31:06Z
+            clusterrole.rbac.authorization.k8s.io/system:controller:attachdetach-controller                              2025-04-18T19:31:06Z
+            clusterrole.rbac.authorization.k8s.io/system:controller:certificate-controller                               2025-04-18T19:31:07Z
+            clusterrole.rbac.authorization.k8s.io/system:controller:clusterrole-aggregation-controller                   2025-04-18T19:31:06Z
+            clusterrole.rbac.authorization.k8s.io/system:controller:cronjob-controller                                   2025-04-18T19:31:06Z
+            clusterrole.rbac.authorization.k8s.io/system:controller:daemon-set-controller                                2025-04-18T19:31:06Z
+            clusterrole.rbac.authorization.k8s.io/system:controller:deployment-controller                                2025-04-18T19:31:06Z
+            clusterrole.rbac.authorization.k8s.io/system:controller:disruption-controller                                2025-04-18T19:31:06Z
+            clusterrole.rbac.authorization.k8s.io/system:controller:endpoint-controller                                  2025-04-18T19:31:06Z
+            clusterrole.rbac.authorization.k8s.io/system:controller:endpointslice-controller                             2025-04-18T19:31:06Z
+            clusterrole.rbac.authorization.k8s.io/system:controller:endpointslicemirroring-controller                    2025-04-18T19:31:06Z
+            clusterrole.rbac.authorization.k8s.io/system:controller:ephemeral-volume-controller                          2025-04-18T19:31:06Z
+            clusterrole.rbac.authorization.k8s.io/system:controller:expand-controller                                    2025-04-18T19:31:06Z
+            clusterrole.rbac.authorization.k8s.io/system:controller:generic-garbage-collector                            2025-04-18T19:31:06Z
+            clusterrole.rbac.authorization.k8s.io/system:controller:horizontal-pod-autoscaler                            2025-04-18T19:31:06Z
+            clusterrole.rbac.authorization.k8s.io/system:controller:job-controller                                       2025-04-18T19:31:06Z
+            clusterrole.rbac.authorization.k8s.io/system:controller:legacy-service-account-token-cleaner                 2025-04-18T19:31:07Z
+            clusterrole.rbac.authorization.k8s.io/system:controller:namespace-controller                                 2025-04-18T19:31:06Z
+            clusterrole.rbac.authorization.k8s.io/system:controller:node-controller                                      2025-04-18T19:31:06Z
+            clusterrole.rbac.authorization.k8s.io/system:controller:persistent-volume-binder                             2025-04-18T19:31:06Z
+            clusterrole.rbac.authorization.k8s.io/system:controller:pod-garbage-collector                                2025-04-18T19:31:06Z
+            clusterrole.rbac.authorization.k8s.io/system:controller:pv-protection-controller                             2025-04-18T19:31:07Z
+            clusterrole.rbac.authorization.k8s.io/system:controller:pvc-protection-controller                            2025-04-18T19:31:07Z
+            clusterrole.rbac.authorization.k8s.io/system:controller:replicaset-controller                                2025-04-18T19:31:06Z
+            clusterrole.rbac.authorization.k8s.io/system:controller:replication-controller                               2025-04-18T19:31:06Z
+            clusterrole.rbac.authorization.k8s.io/system:controller:resourcequota-controller                             2025-04-18T19:31:06Z
+            clusterrole.rbac.authorization.k8s.io/system:controller:root-ca-cert-publisher                               2025-04-18T19:31:07Z
+            clusterrole.rbac.authorization.k8s.io/system:controller:route-controller                                     2025-04-18T19:31:06Z
+            clusterrole.rbac.authorization.k8s.io/system:controller:service-account-controller                           2025-04-18T19:31:07Z
+            clusterrole.rbac.authorization.k8s.io/system:controller:service-controller                                   2025-04-18T19:31:07Z
+            clusterrole.rbac.authorization.k8s.io/system:controller:statefulset-controller                               2025-04-18T19:31:07Z
+            clusterrole.rbac.authorization.k8s.io/system:controller:ttl-after-finished-controller                        2025-04-18T19:31:07Z
+            clusterrole.rbac.authorization.k8s.io/system:controller:ttl-controller                                       2025-04-18T19:31:07Z
+            clusterrole.rbac.authorization.k8s.io/system:controller:validatingadmissionpolicy-status-controller          2025-04-18T19:31:07Z
+            clusterrole.rbac.authorization.k8s.io/system:coredns                                                         2025-04-18T19:31:08Z
+            clusterrole.rbac.authorization.k8s.io/system:discovery                                                       2025-04-18T19:31:06Z
+            clusterrole.rbac.authorization.k8s.io/system:heapster                                                        2025-04-18T19:31:06Z
+            clusterrole.rbac.authorization.k8s.io/system:kube-aggregator                                                 2025-04-18T19:31:06Z
+            clusterrole.rbac.authorization.k8s.io/system:kube-controller-manager                                         2025-04-18T19:31:06Z
+            clusterrole.rbac.authorization.k8s.io/system:kube-dns                                                        2025-04-18T19:31:06Z
+            clusterrole.rbac.authorization.k8s.io/system:kube-scheduler                                                  2025-04-18T19:31:06Z
+            clusterrole.rbac.authorization.k8s.io/system:kubelet-api-admin                                               2025-04-18T19:31:06Z
+            clusterrole.rbac.authorization.k8s.io/system:monitoring                                                      2025-04-18T19:31:06Z
+            clusterrole.rbac.authorization.k8s.io/system:node                                                            2025-04-18T19:31:06Z
+            clusterrole.rbac.authorization.k8s.io/system:node-bootstrapper                                               2025-04-18T19:31:06Z
+            clusterrole.rbac.authorization.k8s.io/system:node-problem-detector                                           2025-04-18T19:31:06Z
+            clusterrole.rbac.authorization.k8s.io/system:node-proxier                                                    2025-04-18T19:31:06Z
+            clusterrole.rbac.authorization.k8s.io/system:persistent-volume-provisioner                                   2025-04-18T19:31:06Z
+            clusterrole.rbac.authorization.k8s.io/system:public-info-viewer                                              2025-04-18T19:31:06Z
+            clusterrole.rbac.authorization.k8s.io/system:service-account-issuer-discovery                                2025-04-18T19:31:06Z
+            clusterrole.rbac.authorization.k8s.io/system:volume-scheduler                                                2025-04-18T19:31:06Z
+            clusterrole.rbac.authorization.k8s.io/view                                                                   2025-04-18T19:31:06Z
+
+
+==================== RBAC RoleBindings ====================
+
+>$ kubectl get rolebindings,clusterrolebindings -A
+NAMESPACE     NAME                                                                                      ROLE                                                  AGE
+kube-public   rolebinding.rbac.authorization.k8s.io/kubeadm:bootstrap-signer-clusterinfo                Role/kubeadm:bootstrap-signer-clusterinfo             7m32s
+kube-public   rolebinding.rbac.authorization.k8s.io/system:controller:bootstrap-signer                  Role/system:controller:bootstrap-signer               7m33s
+kube-system   rolebinding.rbac.authorization.k8s.io/kube-proxy                                          Role/kube-proxy                                       7m31s
+kube-system   rolebinding.rbac.authorization.k8s.io/kubeadm:kubelet-config                              Role/kubeadm:kubelet-config                           7m33s
+kube-system   rolebinding.rbac.authorization.k8s.io/kubeadm:nodes-kubeadm-config                        Role/kubeadm:nodes-kubeadm-config                     7m33s
+kube-system   rolebinding.rbac.authorization.k8s.io/system::extension-apiserver-authentication-reader   Role/extension-apiserver-authentication-reader        7m33s
+kube-system   rolebinding.rbac.authorization.k8s.io/system::leader-locking-kube-controller-manager      Role/system::leader-locking-kube-controller-manager   7m33s
+kube-system   rolebinding.rbac.authorization.k8s.io/system::leader-locking-kube-scheduler               Role/system::leader-locking-kube-scheduler            7m33s
+kube-system   rolebinding.rbac.authorization.k8s.io/system:controller:bootstrap-signer                  Role/system:controller:bootstrap-signer               7m33s
+kube-system   rolebinding.rbac.authorization.k8s.io/system:controller:cloud-provider                    Role/system:controller:cloud-provider                 7m33s
+kube-system   rolebinding.rbac.authorization.k8s.io/system:controller:token-cleaner                     Role/system:controller:token-cleaner                  7m33s
+kube-system   rolebinding.rbac.authorization.k8s.io/system:persistent-volume-provisioner                Role/system:persistent-volume-provisioner             7m31s
+
+NAMESPACE   NAME                                                                                                         ROLE                                                                               AGE
+            clusterrolebinding.rbac.authorization.k8s.io/cluster-admin                                                   ClusterRole/cluster-admin                                                          7m33s
+            clusterrolebinding.rbac.authorization.k8s.io/kubeadm:cluster-admins                                          ClusterRole/cluster-admin                                                          7m33s
+            clusterrolebinding.rbac.authorization.k8s.io/kubeadm:get-nodes                                               ClusterRole/kubeadm:get-nodes                                                      7m33s
+            clusterrolebinding.rbac.authorization.k8s.io/kubeadm:kubelet-bootstrap                                       ClusterRole/system:node-bootstrapper                                               7m33s
+            clusterrolebinding.rbac.authorization.k8s.io/kubeadm:node-autoapprove-bootstrap                              ClusterRole/system:certificates.k8s.io:certificatesigningrequests:nodeclient       7m33s
+            clusterrolebinding.rbac.authorization.k8s.io/kubeadm:node-autoapprove-certificate-rotation                   ClusterRole/system:certificates.k8s.io:certificatesigningrequests:selfnodeclient   7m33s
+            clusterrolebinding.rbac.authorization.k8s.io/kubeadm:node-proxier                                            ClusterRole/system:node-proxier                                                    7m32s
+            clusterrolebinding.rbac.authorization.k8s.io/minikube-rbac                                                   ClusterRole/cluster-admin                                                          7m31s
+            clusterrolebinding.rbac.authorization.k8s.io/permissive-binding                                              ClusterRole/cluster-admin                                                          7m19s
+            clusterrolebinding.rbac.authorization.k8s.io/storage-provisioner                                             ClusterRole/system:persistent-volume-provisioner                                   7m31s
+            clusterrolebinding.rbac.authorization.k8s.io/system:basic-user                                               ClusterRole/system:basic-user                                                      7m33s
+            clusterrolebinding.rbac.authorization.k8s.io/system:controller:attachdetach-controller                       ClusterRole/system:controller:attachdetach-controller                              7m33s
+            clusterrolebinding.rbac.authorization.k8s.io/system:controller:certificate-controller                        ClusterRole/system:controller:certificate-controller                               7m33s
+            clusterrolebinding.rbac.authorization.k8s.io/system:controller:clusterrole-aggregation-controller            ClusterRole/system:controller:clusterrole-aggregation-controller                   7m33s
+            clusterrolebinding.rbac.authorization.k8s.io/system:controller:cronjob-controller                            ClusterRole/system:controller:cronjob-controller                                   7m33s
+            clusterrolebinding.rbac.authorization.k8s.io/system:controller:daemon-set-controller                         ClusterRole/system:controller:daemon-set-controller                                7m33s
+            clusterrolebinding.rbac.authorization.k8s.io/system:controller:deployment-controller                         ClusterRole/system:controller:deployment-controller                                7m33s
+            clusterrolebinding.rbac.authorization.k8s.io/system:controller:disruption-controller                         ClusterRole/system:controller:disruption-controller                                7m33s
+            clusterrolebinding.rbac.authorization.k8s.io/system:controller:endpoint-controller                           ClusterRole/system:controller:endpoint-controller                                  7m33s
+            clusterrolebinding.rbac.authorization.k8s.io/system:controller:endpointslice-controller                      ClusterRole/system:controller:endpointslice-controller                             7m33s
+            clusterrolebinding.rbac.authorization.k8s.io/system:controller:endpointslicemirroring-controller             ClusterRole/system:controller:endpointslicemirroring-controller                    7m33s
+            clusterrolebinding.rbac.authorization.k8s.io/system:controller:ephemeral-volume-controller                   ClusterRole/system:controller:ephemeral-volume-controller                          7m33s
+            clusterrolebinding.rbac.authorization.k8s.io/system:controller:expand-controller                             ClusterRole/system:controller:expand-controller                                    7m33s
+            clusterrolebinding.rbac.authorization.k8s.io/system:controller:generic-garbage-collector                     ClusterRole/system:controller:generic-garbage-collector                            7m33s
+            clusterrolebinding.rbac.authorization.k8s.io/system:controller:horizontal-pod-autoscaler                     ClusterRole/system:controller:horizontal-pod-autoscaler                            7m33s
+            clusterrolebinding.rbac.authorization.k8s.io/system:controller:job-controller                                ClusterRole/system:controller:job-controller                                       7m33s
+            clusterrolebinding.rbac.authorization.k8s.io/system:controller:legacy-service-account-token-cleaner          ClusterRole/system:controller:legacy-service-account-token-cleaner                 7m33s
+            clusterrolebinding.rbac.authorization.k8s.io/system:controller:namespace-controller                          ClusterRole/system:controller:namespace-controller                                 7m33s
+            clusterrolebinding.rbac.authorization.k8s.io/system:controller:node-controller                               ClusterRole/system:controller:node-controller                                      7m33s
+            clusterrolebinding.rbac.authorization.k8s.io/system:controller:persistent-volume-binder                      ClusterRole/system:controller:persistent-volume-binder                             7m33s
+            clusterrolebinding.rbac.authorization.k8s.io/system:controller:pod-garbage-collector                         ClusterRole/system:controller:pod-garbage-collector                                7m33s
+            clusterrolebinding.rbac.authorization.k8s.io/system:controller:pv-protection-controller                      ClusterRole/system:controller:pv-protection-controller                             7m33s
+            clusterrolebinding.rbac.authorization.k8s.io/system:controller:pvc-protection-controller                     ClusterRole/system:controller:pvc-protection-controller                            7m33s
+            clusterrolebinding.rbac.authorization.k8s.io/system:controller:replicaset-controller                         ClusterRole/system:controller:replicaset-controller                                7m33s
+            clusterrolebinding.rbac.authorization.k8s.io/system:controller:replication-controller                        ClusterRole/system:controller:replication-controller                               7m33s
+            clusterrolebinding.rbac.authorization.k8s.io/system:controller:resourcequota-controller                      ClusterRole/system:controller:resourcequota-controller                             7m33s
+            clusterrolebinding.rbac.authorization.k8s.io/system:controller:root-ca-cert-publisher                        ClusterRole/system:controller:root-ca-cert-publisher                               7m33s
+            clusterrolebinding.rbac.authorization.k8s.io/system:controller:route-controller                              ClusterRole/system:controller:route-controller                                     7m33s
+            clusterrolebinding.rbac.authorization.k8s.io/system:controller:service-account-controller                    ClusterRole/system:controller:service-account-controller                           7m33s
+            clusterrolebinding.rbac.authorization.k8s.io/system:controller:service-controller                            ClusterRole/system:controller:service-controller                                   7m33s
+            clusterrolebinding.rbac.authorization.k8s.io/system:controller:statefulset-controller                        ClusterRole/system:controller:statefulset-controller                               7m33s
+            clusterrolebinding.rbac.authorization.k8s.io/system:controller:ttl-after-finished-controller                 ClusterRole/system:controller:ttl-after-finished-controller                        7m33s
+            clusterrolebinding.rbac.authorization.k8s.io/system:controller:ttl-controller                                ClusterRole/system:controller:ttl-controller                                       7m33s
+            clusterrolebinding.rbac.authorization.k8s.io/system:controller:validatingadmissionpolicy-status-controller   ClusterRole/system:controller:validatingadmissionpolicy-status-controller          7m33s
+            clusterrolebinding.rbac.authorization.k8s.io/system:coredns                                                  ClusterRole/system:coredns                                                         7m32s
+            clusterrolebinding.rbac.authorization.k8s.io/system:discovery                                                ClusterRole/system:discovery                                                       7m33s
+            clusterrolebinding.rbac.authorization.k8s.io/system:kube-controller-manager                                  ClusterRole/system:kube-controller-manager                                         7m33s
+            clusterrolebinding.rbac.authorization.k8s.io/system:kube-dns                                                 ClusterRole/system:kube-dns                                                        7m33s
+            clusterrolebinding.rbac.authorization.k8s.io/system:kube-scheduler                                           ClusterRole/system:kube-scheduler                                                  7m33s
+            clusterrolebinding.rbac.authorization.k8s.io/system:monitoring                                               ClusterRole/system:monitoring                                                      7m33s
+            clusterrolebinding.rbac.authorization.k8s.io/system:node                                                     ClusterRole/system:node                                                            7m33s
+            clusterrolebinding.rbac.authorization.k8s.io/system:node-proxier                                             ClusterRole/system:node-proxier                                                    7m33s
+            clusterrolebinding.rbac.authorization.k8s.io/system:public-info-viewer                                       ClusterRole/system:public-info-viewer                                              7m33s
+            clusterrolebinding.rbac.authorization.k8s.io/system:service-account-issuer-discovery                         ClusterRole/system:service-account-issuer-discovery                                7m33s
+            clusterrolebinding.rbac.authorization.k8s.io/system:volume-scheduler                                         ClusterRole/system:volume-scheduler                                                7m33s
+
+
+==================== Summary ====================
+
+Probe complete. Full report saved to probe_report_20250418_213839.txt.
