@@ -19,6 +19,10 @@ kubectl apply -f manifests/
 kubectl get pods --all-namespaces
 ```
 
+```shell
+kubectl get services --all-namespaces
+```
+
 ## Exploitation
 
 ### DockerDesktop
