@@ -30,3 +30,15 @@ spec:
               key: ssh-root-password
         securityContext:
           privileged: true
+        livenessProbe:
+          tcpSocket:
+            port: 22
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          tcpSocket:
+            port: 22
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          failureThreshold: 2
