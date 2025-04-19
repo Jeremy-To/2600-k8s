@@ -32,9 +32,8 @@ spec:
           periodSeconds: 10
           failureThreshold: 3
         readinessProbe:
-          httpGet:
-            path: /
-            port: 5000
+          exec:
+            command: ["pgrep", "-f", "app.py"]
           initialDelaySeconds: 5
           periodSeconds: 5
           failureThreshold: 2

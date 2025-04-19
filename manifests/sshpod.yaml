@@ -37,8 +37,8 @@ spec:
           periodSeconds: 10
           failureThreshold: 3
         readinessProbe:
-          tcpSocket:
-            port: 22
+          exec:
+            command: ["pgrep", "sshd"]
           initialDelaySeconds: 5
           periodSeconds: 5
           failureThreshold: 2
